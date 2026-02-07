@@ -1,4 +1,4 @@
-import type { user } from "./user";
+import type { User } from "./user";
 
 interface ChatRoomMember {
     chat_room_id: number;
@@ -7,7 +7,7 @@ interface ChatRoomMember {
     createdAt: string;
     updatedAt: string;
 
-    User?: user; // chỉ có khi include User
+    User?: User; // chỉ có khi include User
 }
 
 interface ChatRoom {
