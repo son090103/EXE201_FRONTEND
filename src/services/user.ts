@@ -7,5 +7,6 @@ const API_USER = {
     getUser: `${port}/client/check/users`,
     updateProfile: `${port}/client/check/updateProfile`,
     getUserProfile: `${port}/client/notcheck/getProfileUser`,
+    homeUser: `${port}/client/check/homeUser`,
 }
 export default API_USER
