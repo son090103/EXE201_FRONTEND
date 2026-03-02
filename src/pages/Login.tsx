@@ -64,17 +64,6 @@ const LoginPage: React.FC = () => {
     return (
         <div className="relative min-h-screen flex items-center justify-center bg-gray-100">
 
-            {/* Loading Overlay */}
-            {loading && (
-                <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center">
-                    <div className="bg-white rounded-2xl p-8 flex flex-col items-center gap-4 shadow-2xl">
-                        <div className="w-14 h-14 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin" />
-                        <p className="text-gray-700 font-semibold text-lg">Đang đăng nhập...</p>
-                        <p className="text-gray-400 text-sm">Vui lòng chờ một chút</p>
-                    </div>
-                </div>
-            )}
-
             {/* WRAPPER 90% */}
             <div className="flex w-[90%] mx-auto min-h-[90vh] flex-row-reverse bg-white rounded-3xl overflow-hidden shadow-2xl">
 
@@ -217,8 +206,17 @@ const LoginPage: React.FC = () => {
                                 disabled={loading}
                                 className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-4 rounded-xl font-semibold hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2 group disabled:opacity-70 disabled:cursor-not-allowed"
                             >
-                                Sign In
-                                <ArrowRight className="group-hover:translate-x-1 transition-transform" size={20} />
+                                {loading ? (
+                                    <>
+                                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                        Đang đăng nhập...
+                                    </>
+                                ) : (
+                                    <>
+                                        Sign In
+                                        <ArrowRight className="group-hover:translate-x-1 transition-transform" size={20} />
+                                    </>
+                                )}
                             </button>
                         </div>
                     </div>
