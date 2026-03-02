@@ -10,21 +10,22 @@ const LoginPage: React.FC = () => {
     const [password, setPassword] = useState<string>('');
     const [showPassword, setShowPassword] = useState<boolean>(false);
     const [rememberMe, setRememberMe] = useState<boolean>(false);
+    const [loading, setLoading] = useState<boolean>(false);
     const dispatch = useDispatch();
-    const navigate = useNavigate()
+    const navigate = useNavigate();
+
     const handleLogin = async () => {
+        if (!email || !password) {
+            alert("Email và password không được để trống");
+            return;
+        }
+
+        setLoading(true);
         try {
-            if (!email || !password) {
-                alert("Email và password không được để trống");
-                return;
-            }
-            console.log("bắt đầu chạy vào login")
             const response = await fetch(API_USER.login, {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                credentials: "include", // ⭐ BẮT BUỘC để gửi/nhận cookie
+                headers: { "Content-Type": "application/json" },
+                credentials: "include",
                 body: JSON.stringify({ email, password }),
             });
 
@@ -36,47 +37,44 @@ const LoginPage: React.FC = () => {
 
             const ResponseProfile = await fetch(API_USER.profile, {
                 method: "GET",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                credentials: "include", // ⭐ BẮT BUỘC để gửi/nhận cookie
+                headers: { "Content-Type": "application/json" },
+                credentials: "include",
             });
 
             const dataProfile = await ResponseProfile.json();
 
             if (!ResponseProfile.ok) {
-                throw new Error(dataProfile.message || "Profile fail");
-            }
-
-            // ✅ Chỉ lưu trạng thái đăng nhập (KHÔNG token)
-            // dispatch(loginSuccess({
-            //     id: dataProfile.data.id,
-            //     name: dataProfile.data.name,
-            //     email: dataProfile.data.email,
-            //     avatar: dataProfile.data.avatar,
-            //     role_id: dataProfile.data.role_id,
-            // }));
-            if (!response.ok) {
-                throw new Error(dataProfile.message || "Profile fail");
+                throw new Error(dataProfile.message || "Profile failed");
             }
 
             dispatch(loginSuccess(dataProfile.data));
             navigate("/home");
-
         } catch (error) {
             console.error("Login error:", error);
             alert(error instanceof Error ? error.message : "Login error");
+        } finally {
+            setLoading(false);
         }
     };
 
     const handleKeyPress = (e: React.KeyboardEvent): void => {
-        if (e.key === 'Enter') {
-            handleLogin();
-        }
+        if (e.key === 'Enter') handleLogin();
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <div className="relative min-h-screen flex items-center justify-center bg-gray-100">
+
+            {/* Loading Overlay */}
+            {loading && (
+                <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center">
+                    <div className="bg-white rounded-2xl p-8 flex flex-col items-center gap-4 shadow-2xl">
+                        <div className="w-14 h-14 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin" />
+                        <p className="text-gray-700 font-semibold text-lg">Đang đăng nhập...</p>
+                        <p className="text-gray-400 text-sm">Vui lòng chờ một chút</p>
+                    </div>
+                </div>
+            )}
+
             {/* WRAPPER 90% */}
             <div className="flex w-[90%] mx-auto min-h-[90vh] flex-row-reverse bg-white rounded-3xl overflow-hidden shadow-2xl">
 
@@ -90,7 +88,6 @@ const LoginPage: React.FC = () => {
                     <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/30"></div>
 
                     <div className="absolute inset-0 flex flex-col justify-between p-12 text-white">
-                        {/* Top */}
                         <div>
                             <div className="flex items-center gap-2 mb-2">
                                 <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center">
@@ -101,12 +98,10 @@ const LoginPage: React.FC = () => {
                             <p className="text-white/80 text-sm">Where passions connect</p>
                         </div>
 
-                        {/* Middle */}
                         <div className="space-y-8">
                             <h1 className="text-5xl font-bold leading-tight">
                                 Connect with people who share your passion
                             </h1>
-
                             <div className="space-y-4">
                                 <div className="flex items-center gap-4 bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/20">
                                     <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0">
@@ -117,7 +112,6 @@ const LoginPage: React.FC = () => {
                                         <p className="text-sm text-white/70">Join a thriving community</p>
                                     </div>
                                 </div>
-
                                 <div className="flex items-center gap-4 bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/20">
                                     <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0">
                                         <Zap className="text-yellow-300" size={24} />
@@ -130,7 +124,6 @@ const LoginPage: React.FC = () => {
                             </div>
                         </div>
 
-                        {/* Bottom */}
                         <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20">
                             <p className="text-lg italic mb-4">
                                 "This platform changed how I connect with people. Found my tennis partner in just one week!"
@@ -161,9 +154,7 @@ const LoginPage: React.FC = () => {
                         <div className="space-y-6">
                             {/* Email */}
                             <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                                    Email
-                                </label>
+                                <label className="block text-sm font-semibold text-gray-700 mb-2">Email</label>
                                 <div className="relative">
                                     <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
                                     <input
@@ -172,16 +163,15 @@ const LoginPage: React.FC = () => {
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
                                         onKeyPress={handleKeyPress}
-                                        className="w-full pl-12 pr-4 py-3.5 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-purple-500 focus:ring-4 focus:ring-purple-50 transition-all"
+                                        disabled={loading}
+                                        className="w-full pl-12 pr-4 py-3.5 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-purple-500 focus:ring-4 focus:ring-purple-50 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
                                     />
                                 </div>
                             </div>
 
                             {/* Password */}
                             <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                                    Password
-                                </label>
+                                <label className="block text-sm font-semibold text-gray-700 mb-2">Password</label>
                                 <div className="relative">
                                     <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
                                     <input
@@ -190,12 +180,14 @@ const LoginPage: React.FC = () => {
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
                                         onKeyPress={handleKeyPress}
-                                        className="w-full pl-12 pr-12 py-3.5 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-purple-500 focus:ring-4 focus:ring-purple-50 transition-all"
+                                        disabled={loading}
+                                        className="w-full pl-12 pr-12 py-3.5 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-purple-500 focus:ring-4 focus:ring-purple-50 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
                                     />
                                     <button
                                         type="button"
                                         onClick={() => setShowPassword(!showPassword)}
-                                        className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                        disabled={loading}
+                                        className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 disabled:opacity-60"
                                     >
                                         {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                                     </button>
@@ -209,11 +201,12 @@ const LoginPage: React.FC = () => {
                                         type="checkbox"
                                         checked={rememberMe}
                                         onChange={(e) => setRememberMe(e.target.checked)}
+                                        disabled={loading}
                                         className="w-4 h-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500"
                                     />
                                     <span className="text-sm text-gray-700">Remember me</span>
                                 </label>
-                                <a className="text-sm font-semibold text-purple-600 hover:text-purple-700">
+                                <a className="text-sm font-semibold text-purple-600 hover:text-purple-700 cursor-pointer">
                                     Forgot password?
                                 </a>
                             </div>
@@ -221,7 +214,8 @@ const LoginPage: React.FC = () => {
                             {/* Button */}
                             <button
                                 onClick={handleLogin}
-                                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-4 rounded-xl font-semibold hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2 group"
+                                disabled={loading}
+                                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-4 rounded-xl font-semibold hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2 group disabled:opacity-70 disabled:cursor-not-allowed"
                             >
                                 Sign In
                                 <ArrowRight className="group-hover:translate-x-1 transition-transform" size={20} />
